@@ -37,10 +37,6 @@ BOOL WINAPI FlushFileBuffersHook(HANDLE file)
     return FlushFileBuffersTrampoline(file);
 }
 
-struct plugin : public plugmod_t {
-    virtual bool idaapi run(size_t arg) override;
-};
-
 plugmod_t* idaapi IDAP_init()
 {
     Kernel32 = LoadLibrary("kernel32.dll");
@@ -75,7 +71,7 @@ plugmod_t* idaapi IDAP_init()
         return PLUGIN_SKIP;
     }
 
-    return new plugin;
+    return PLUGIN_KEEP;
 }
 
 void idaapi IDAP_term()
@@ -92,7 +88,7 @@ void idaapi IDAP_term()
         FreeLibrary(Kernel32);
 }
 
-bool idaapi plugin::run(size_t)
+bool idaapi IDAP_run(size_t)
 {
     return true;
 }
@@ -105,7 +101,7 @@ plugin_t __declspec(dllexport) PLUGIN =
     PLUGIN_HIDE,            // Flags
     IDAP_init,              // Initialisation function
     IDAP_term,              // Clean-up function
-    nullptr,               // Main plug-in body
+    IDAP_run,               // Main plug-in body
     "",                     // Comment - unused
     "",                     // As above - unused
     IDAP_name,              // Plug-in name shown in
