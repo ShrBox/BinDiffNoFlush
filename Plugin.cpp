@@ -37,7 +37,11 @@ BOOL WINAPI FlushFileBuffersHook(HANDLE file)
     return FlushFileBuffersTrampoline(file);
 }
 
-int idaapi IDAP_init()
+struct plugin : public plugmod_t {
+    virtual bool idaapi run(size_t arg) override;
+};
+
+plugmod_t* idaapi IDAP_init()
 {
     Kernel32 = LoadLibrary("kernel32.dll");
     if (!Kernel32)
@@ -71,7 +75,7 @@ int idaapi IDAP_init()
         return PLUGIN_SKIP;
     }
 
-    return PLUGIN_KEEP;
+    return new plugin;
 }
 
 void idaapi IDAP_term()
@@ -88,8 +92,9 @@ void idaapi IDAP_term()
         FreeLibrary(Kernel32);
 }
 
-void idaapi IDAP_run(int)
+bool idaapi plugin::run(size_t)
 {
+    return true;
 }
 
 char const IDAP_name[] = "BinDiffNoFlush";
@@ -100,7 +105,7 @@ plugin_t __declspec(dllexport) PLUGIN =
     PLUGIN_HIDE,            // Flags
     IDAP_init,              // Initialisation function
     IDAP_term,              // Clean-up function
-    IDAP_run,               // Main plug-in body
+    nullptr,               // Main plug-in body
     "",                     // Comment - unused
     "",                     // As above - unused
     IDAP_name,              // Plug-in name shown in
